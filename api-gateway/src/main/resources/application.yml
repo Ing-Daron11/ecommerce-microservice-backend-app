@@ -6,6 +6,9 @@ server:
 spring:
   zipkin:
     base-url: ${SPRING_ZIPKIN_BASE_URL:http://localhost:9411/}
+  sleuth:
+    sampler:
+      probability: 1.0
   config:
     import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:9296}
   application:
@@ -49,10 +52,6 @@ spring:
         uri: lb://SHIPPING-SERVICE
         predicates:
         - Path=/shipping-service/**
-      - id: USER-SERVICE
-        uri: lb://USER-SERVICE
-        predicates:
-        - Path=/user-service/**
       - id: FAVOURITE-SERVICE
         uri: lb://FAVOURITE-SERVICE
         predicates:
