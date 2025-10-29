@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-config
+  labels:
+    app: cloud-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-config
+  template:
+    metadata:
+      labels:
+        app: cloud-config
+    spec:
+      containers:
+      - name: cloud-config
+        image: cloud-config:v0.1.0
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 9296
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "dev"
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://service-discovery:8761/eureka/"
+        - name: SPRING_ZIPKIN_BASE_URL
+          value: "http://zipkin:9411/"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9296
+          initialDelaySeconds: 150
+          periodSeconds: 15
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9296
+          initialDelaySeconds: 130
+          periodSeconds: 10
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-config
+spec:
+  type: ClusterIP
+  selector:
+    app: cloud-config
+  ports:
+  - name: http
+    port: 9296
+    targetPort: 9296
