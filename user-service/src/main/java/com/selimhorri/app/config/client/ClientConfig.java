@@ -17,13 +17,3 @@ public class ClientConfig {
 	
 	
 }
-
-
-
-
-
-
-
-
-
-

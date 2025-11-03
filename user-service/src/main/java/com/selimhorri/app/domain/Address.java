@@ -46,13 +46,3 @@ public final class Address extends AbstractMappedEntity implements Serializable 
 	private User user;
 	
 }
-
-
-
-
-
-
-
-
-
-
