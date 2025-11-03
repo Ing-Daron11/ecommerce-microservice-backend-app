@@ -1,0 +1,75 @@
+# ===================================================================
+# GitHub Actions Workflow - Service Discovery Build (Dev Environment)
+# ===================================================================
+
+name: "[DEV] Service Discovery - Build"
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'service-discovery/**'
+      - 'pom.xml'
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'service-discovery/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MAVEN_OPTS: "-Xmx1024m"
+      SERVICE_NAME: "service-discovery"
+    
+    steps:
+      - name: "Checkout código"
+        uses: actions/checkout@v4
+      
+      - name: "Configurar Java 11"
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: "Compilar Service Discovery"
+        run: mvn clean compile -pl service-discovery -DskipTests
+      
+      - name: "Empaquetar (JAR)"
+        run: mvn package -pl service-discovery -DskipTests
+      
+      - name: "Verificar artefacto"
+        run: |
+          if [ -f service-discovery/target/service-discovery-v0.1.0.jar ]; then
+            echo "JAR construido correctamente"
+            ls -lh service-discovery/target/service-discovery-v0.1.0.jar
+          else
+            echo "JAR no encontrado"
+            exit 1
+          fi
+
+  docker-build:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: "service-discovery"
+      IMAGE_TAG: "v0.1.0-dev"
+    
+    steps:
+      - name: "Checkout código"
+        uses: actions/checkout@v4
+      
+      - name: "Construir imagen Docker"
+        run: |
+          docker build \
+            -f service-discovery/Dockerfile \
+            -t ${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
+            .
+      
+      - name: "Verificar imagen"
+        run: docker images | grep ${{ env.SERVICE_NAME }}
