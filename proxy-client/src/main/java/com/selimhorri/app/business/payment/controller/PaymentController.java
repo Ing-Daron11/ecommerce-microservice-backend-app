@@ -1,5 +1,8 @@
 package com.selimhorri.app.business.payment.controller;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,44 +23,33 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
 public class PaymentController {
-	
+
 	private final PaymentClientService paymentClientService;
-	
+
 	@GetMapping
 	public ResponseEntity<PaymentPaymentServiceDtoCollectionResponse> findAll() {
 		return ResponseEntity.ok(this.paymentClientService.findAll().getBody());
 	}
-	
+
 	@GetMapping("/{paymentId}")
 	public ResponseEntity<PaymentDto> findById(@PathVariable("paymentId") final String paymentId) {
 		return ResponseEntity.ok(this.paymentClientService.findById(paymentId).getBody());
 	}
-	
+
 	@PostMapping
 	public ResponseEntity<PaymentDto> save(@RequestBody final PaymentDto paymentDto) {
 		return ResponseEntity.ok(this.paymentClientService.save(paymentDto).getBody());
 	}
-	
-	@PutMapping
-	public ResponseEntity<PaymentDto> update(@RequestBody final PaymentDto paymentDto) {
-		return ResponseEntity.ok(this.paymentClientService.update(paymentDto).getBody());
+
+	@PutMapping("/{paymentId}")
+	public ResponseEntity<PaymentDto> updateStatus(
+			@PathVariable("paymentId") @NotBlank(message = "Input must not be blank") @Valid final String paymentId) {
+		return ResponseEntity.ok(this.paymentClientService.updateStatus(paymentId).getBody());
 	}
-	
+
 	@DeleteMapping("/{paymentId}")
 	public ResponseEntity<Boolean> deleteById(@PathVariable("paymentId") final String paymentId) {
 		return ResponseEntity.ok(this.paymentClientService.deleteById(paymentId).getBody());
 	}
-	
-	
-	
+
 }
-
-
-
-
-
-
-
-
-
-
