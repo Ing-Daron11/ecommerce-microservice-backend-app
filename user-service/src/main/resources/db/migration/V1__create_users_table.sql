@@ -1,4 +1,3 @@
-
 CREATE TABLE users (
 	user_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	first_name VARCHAR(255),
