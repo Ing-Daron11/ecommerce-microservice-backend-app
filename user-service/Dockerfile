@@ -1,5 +1,5 @@
 
-FROM openjdk:11
+FROM eclipse-temurin:11-jre
 LABEL maintainer="selimhorri.github.io"
 RUN mkdir -p /home/app
 WORKDIR /home/app

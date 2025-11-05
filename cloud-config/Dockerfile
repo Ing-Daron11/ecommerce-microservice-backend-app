@@ -2,6 +2,7 @@ FROM openjdk:11
 LABEL maintainer="selimhorri.github.io"
 RUN mkdir -p /home/app
 WORKDIR /home/app
+FROM eclipse-temurin:11-jre
 ARG PROJECT_VERSION=0.1.0
 ENV SPRING_PROFILES_ACTIVE=dev
 ADD cloud-config/target/cloud-config-v${PROJECT_VERSION}.jar cloud-config.jar
