@@ -81,7 +81,7 @@ jobs:
           docker build -f user-service/Dockerfile -t user-service:dev-${{ github.sha }} .
 
       - name: List Docker images
-        run: docker images | grep user-service
+        run: docker images | Select-String "user-service"
 
       - name: Clean up old images
         run: |
