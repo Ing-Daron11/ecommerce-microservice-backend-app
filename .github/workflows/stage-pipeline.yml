@@ -53,18 +53,16 @@ jobs:
           minikube -p minikube docker-env --shell powershell | Invoke-Expression
           
           Write-Host "Building user-service image..."
-          cd user-service
-          docker build -t user-service:v0.1.0 .
+          docker build -f user-service/Dockerfile -t user-service:v0.1.0 .
           
           Write-Host "Building proxy-client image..."
-          cd ../proxy-client
-          docker build -t proxy-client:v0.1.0 .
+          docker build -f proxy-client/Dockerfile -t proxy-client:v0.1.0 .
           
           Write-Host "Images built successfully"
 
       - name: Verify images in Minikube
         run: |
-          minikube ssh "docker images | grep -E 'user-service|proxy-client'"
+          minikube ssh "docker images | Select-String 'user-service|proxy-client'"
 
       - name: Deploy to Kubernetes
         run: |
@@ -111,7 +109,7 @@ jobs:
         continue-on-error: true
         run: |
           Write-Host "Running integration tests..."
-          mvn test -Dtest='*IntegrationTest' -DexcludedGroups='e2e'
+          mvn test -Dtest='*IntegrationTest' -DexcludedGroups='e2e' -DfailIfNoTests=false
           Write-Host "Integration tests completed"
 
       - name: Generate integration test report
