@@ -62,7 +62,7 @@ jobs:
 
       - name: Verify images in Minikube
         run: |
-          minikube ssh "docker images | Select-String 'user-service|proxy-client'"
+          minikube ssh "docker images | grep -E 'user-service|proxy-client'"
 
       - name: Deploy to Kubernetes
         run: |
