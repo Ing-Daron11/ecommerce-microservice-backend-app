@@ -69,4 +69,33 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		log.info("**Jwt request filtered!*\n");
 	}
 
+	// ✅ NUEVO: Excluir rutas públicas del filtro JWT
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		String path = request.getRequestURI();
+		log.info("Verificando si filtrar path: {}", path);
+		
+		// Excluir rutas públicas del filtro JWT
+		boolean shouldNotFilter = path.equals("/") || 
+				path.equals("/index") || 
+				path.startsWith("/app/api/authenticate") ||
+				path.startsWith("/api/authenticate") ||
+				(path.startsWith("/app/api/users") && "POST".equals(request.getMethod())) ||
+				(path.startsWith("/api/users") && "POST".equals(request.getMethod())) ||
+				(path.startsWith("/app/api/credentials") && "POST".equals(request.getMethod())) ||  // ✅ AGREGADO
+				(path.startsWith("/api/credentials") && "POST".equals(request.getMethod())) ||  // ✅ AGREGADO
+				(path.startsWith("/app/api/products") && "GET".equals(request.getMethod())) ||
+				(path.startsWith("/api/products") && "GET".equals(request.getMethod())) ||
+				(path.startsWith("/app/api/categories") && "GET".equals(request.getMethod())) ||
+				(path.startsWith("/api/categories") && "GET".equals(request.getMethod())) ||
+				path.startsWith("/actuator/health") ||
+				path.startsWith("/actuator/info");
+		
+		if (shouldNotFilter) {
+			log.info("✅ Path {} excluido del filtro JWT", path);
+		}
+		
+		return shouldNotFilter;
+	}
+
 }

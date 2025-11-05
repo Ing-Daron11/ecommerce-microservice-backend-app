@@ -88,4 +88,9 @@ public class UserResource {
 		return ResponseEntity.ok(true);
 	}	
 	
+	@GetMapping("/nicolas/carechimba")
+	public String nicolasCarechimba() {
+		String msj = "Nicolas carechimba";
+		return msj;
+	}
 }

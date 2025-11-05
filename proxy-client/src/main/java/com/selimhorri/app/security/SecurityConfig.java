@@ -38,16 +38,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.cors().disable()
 				.csrf().disable()
 				.authorizeRequests()
-				// Public endpoints
-				.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-				.antMatchers("/", "index", "**/css/**", "**/js/**").permitAll()
-				.antMatchers("/api/authenticate/**").permitAll()
-				.antMatchers(HttpMethod.POST, "/api/users").permitAll()
-				.antMatchers(HttpMethod.GET, "/api/products").permitAll()
-				.antMatchers(HttpMethod.GET, "/api/products/*").permitAll()
-				.antMatchers(HttpMethod.GET, "/api/categories").permitAll()
-				.antMatchers(HttpMethod.GET, "/api/categories/*").permitAll()
-				.antMatchers("/actuator/health/**", "/actuator/info/**").permitAll()
+			// Public endpoints
+			.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+			.antMatchers("/", "index", "**/css/**", "**/js/**").permitAll()
+			.antMatchers("/api/authenticate/**").permitAll()
+			.antMatchers("/app/api/authenticate/**").permitAll()  // ✅ AGREGADO para context-path /app
+			.antMatchers(HttpMethod.POST, "/api/users").permitAll()
+			.antMatchers(HttpMethod.POST, "/app/api/users").permitAll()  // ✅ AGREGADO para context-path /app
+			.antMatchers(HttpMethod.POST, "/api/credentials").permitAll()  // ✅ AGREGADO para crear credenciales sin auth
+			.antMatchers(HttpMethod.POST, "/app/api/credentials").permitAll()  // ✅ AGREGADO para context-path /app
+			.antMatchers(HttpMethod.GET, "/api/products").permitAll()
+			.antMatchers(HttpMethod.GET, "/api/products/*").permitAll()
+			.antMatchers(HttpMethod.GET, "/app/api/products").permitAll()  // ✅ AGREGADO
+			.antMatchers(HttpMethod.GET, "/app/api/products/*").permitAll()  // ✅ AGREGADO
+			.antMatchers(HttpMethod.GET, "/api/categories").permitAll()
+			.antMatchers(HttpMethod.GET, "/api/categories/*").permitAll()
+			.antMatchers(HttpMethod.GET, "/app/api/categories").permitAll()  // ✅ AGREGADO
+			.antMatchers(HttpMethod.GET, "/app/api/categories/*").permitAll()  // ✅ AGREGADO
+			.antMatchers("/actuator/health/**", "/actuator/info/**").permitAll()
 				// Admin only
 				.antMatchers("/actuator/**").hasRole(RoleBasedAuthority.ROLE_ADMIN.getRole())
 				// Protected endpoints - authentication required

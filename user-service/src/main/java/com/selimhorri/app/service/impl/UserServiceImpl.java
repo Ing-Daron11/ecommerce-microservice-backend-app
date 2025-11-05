@@ -3,16 +3,15 @@ package com.selimhorri.app.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.selimhorri.app.domain.User;
 import com.selimhorri.app.dto.UserDto;
 import com.selimhorri.app.exception.wrapper.UserObjectNotFoundException;
 import com.selimhorri.app.helper.UserMappingHelper;
-import com.selimhorri.app.repository.CredentialRepository;
 import com.selimhorri.app.repository.UserRepository;
 import com.selimhorri.app.service.UserService;
 
@@ -26,14 +25,13 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
-	private final CredentialRepository credentialRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public List<UserDto> findAll() {
-		log.info("*** UserDto List, service; fetch all users with credentials *");
+		log.info("*** UserDto List, service; fetch all users *");
 		return this.userRepository.findAll()
 				.stream()
-				.filter(user -> user.getCredential() != null) // Asumiendo que hay un getCredentials()
 				.map(UserMappingHelper::map)
 				.distinct()
 				.collect(Collectors.toUnmodifiableList());
@@ -41,13 +39,65 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDto findById(final Integer userId) {
-		log.info("*** UserDto, service; fetch user by id with credentials *");
+		log.info("*** UserDto, service; fetch user by id *");
 		return this.userRepository.findById(userId)
-				.filter(user -> user.getCredential() != null) // Filtramos que tenga credenciales
 				.map(UserMappingHelper::map)
 				.orElseThrow(
-						() -> new UserObjectNotFoundException(
-								String.format("User with id: %d not found or has no credentials", userId)));
+						() -> new UserObjectNotFoundException(String.format("User with id: %d not found", userId)));
+	}
+
+	@Override
+	public UserDto save(final UserDto userDto) {
+		log.info("*** UserDto, service; save user *");
+
+		// Encriptar la contraseña antes de guardar
+		if (userDto.getCredentialDto() != null && userDto.getCredentialDto().getPassword() != null) {
+			String originalPassword = userDto.getCredentialDto().getPassword();
+			String encryptedPassword = passwordEncoder.encode(originalPassword);
+			log.info("🔐 Password encrypted: {} -> {}", originalPassword.substring(0, 3) + "***", encryptedPassword.substring(0, 20) + "...");
+			userDto.getCredentialDto().setPassword(encryptedPassword);
+		}
+
+		// Mapear DTO a Entity
+		var user = UserMappingHelper.map(userDto);
+
+		// CRÍTICO: Establecer relación bidireccional entre User y Credential
+		// Esto es necesario para que JPA guarde el credential correctamente
+		if (user.getCredential() != null) {
+			user.getCredential().setUser(user);
+			log.info("✅ Bidirectional relationship User <-> Credential established");
+		}
+
+		// Establecer relación bidireccional entre User y Addresses
+		if (user.getAddresses() != null && !user.getAddresses().isEmpty()) {
+			user.getAddresses().forEach(address -> address.setUser(user));
+		}
+
+		// Guardar y retornar
+		User savedUser = this.userRepository.save(user);
+		log.info("💾 User saved with ID: {}, Credential ID: {}", savedUser.getUserId(), 
+				savedUser.getCredential() != null ? savedUser.getCredential().getCredentialId() : "null");
+		
+		return UserMappingHelper.map(savedUser);
+	}
+
+	@Override
+	public UserDto update(final UserDto userDto) {
+		log.info("*** UserDto, service; update user *");
+		return UserMappingHelper.map(this.userRepository.save(UserMappingHelper.map(userDto)));
+	}
+
+	@Override
+	public UserDto update(final Integer userId, final UserDto userDto) {
+		log.info("*** UserDto, service; update user with userId *");
+		return UserMappingHelper.map(this.userRepository.save(
+				UserMappingHelper.map(this.findById(userId))));
+	}
+
+	@Override
+	public void deleteById(final Integer userId) {
+		log.info("*** Void, service; delete user by id *");
+		this.userRepository.deleteById(userId);
 	}
 
 	@Override
@@ -56,77 +106,6 @@ public class UserServiceImpl implements UserService {
 		return UserMappingHelper.map(this.userRepository.findByCredentialUsername(username)
 				.orElseThrow(() -> new UserObjectNotFoundException(
 						String.format("User with username: %s not found", username))));
-	}
-
-	@Override
-	public UserDto save(final UserDto userDto) {
-		log.info("*** UserDto, service; save user *");
-		userDto.setUserId(null); // para evitar sobrescribir
-		return UserMappingHelper.map(this.userRepository.save(UserMappingHelper.mapOnlyUser(userDto)));
-	}
-
-	@Override
-	public UserDto update(final UserDto userDto) {
-		log.info("*** UserDto, service; update user ***");
-
-		// Buscar el usuario y verificar que tenga credenciales
-		User existingUser = this.userRepository.findById(userDto.getUserId())
-				.filter(user -> user.getCredential() != null) // Solo si tiene credenciales
-				.orElseThrow(() -> new EntityNotFoundException(
-						"User not found or has no credentials (cannot update)"));
-
-		// Actualizar campos permitidos
-		existingUser.setFirstName(userDto.getFirstName());
-		existingUser.setLastName(userDto.getLastName());
-		existingUser.setImageUrl(userDto.getImageUrl());
-		existingUser.setEmail(userDto.getEmail());
-		existingUser.setPhone(userDto.getPhone());
-
-		return UserMappingHelper.map(this.userRepository.save(existingUser));
-	}
-
-	@Override
-	public UserDto update(final Integer userId, final UserDto userDto) {
-		log.info("*** UserDto, service; update user with userId ***");
-
-		// Verificar que el usuario existe y tiene credenciales
-		User existingUser = this.userRepository.findById(userId)
-				.filter(user -> user.getCredential() != null) // Solo si tiene credenciales
-				.orElseThrow(() -> new EntityNotFoundException(
-						"User not found with id: " + userId + " or has no credentials (cannot update)"));
-
-		// Actualizar campos permitidos
-		existingUser.setFirstName(userDto.getFirstName());
-		existingUser.setLastName(userDto.getLastName());
-		existingUser.setImageUrl(userDto.getImageUrl());
-		existingUser.setEmail(userDto.getEmail());
-		existingUser.setPhone(userDto.getPhone());
-
-		return UserMappingHelper.map(this.userRepository.save(existingUser));
-	}
-
-	@Override
-	@Transactional // Asegura que sea una transacción atómica
-	public void deleteById(final Integer userId) {
-		log.info("*** Void, service; delete credentials from user by id ***");
-
-		// 1. Buscar el usuario y verificar que existe y tiene credenciales
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-
-		if (user.getCredential() == null) {
-			throw new UserObjectNotFoundException("User with id: " + userId + " has no credentials to delete");
-		}
-
-		// 2. Obtener el ID de las credenciales para borrarlas
-		Integer credentialsId = user.getCredential().getCredentialId();
-
-		// 3. Desvincular las credenciales del usuario (para evitar inconsistencias)
-		user.setCredential(null);
-		userRepository.save(user); // Guardar el cambio
-
-		// 4. Borrar las credenciales de la base de datos
-		credentialRepository.deleteByCredentialId(credentialsId);
 	}
 
 }
