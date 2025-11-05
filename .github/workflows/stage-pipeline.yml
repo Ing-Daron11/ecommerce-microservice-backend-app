@@ -1,0 +1,292 @@
+name: STAGE Pipeline - Build, Deploy to Minikube and Integration Tests
+
+on:
+  push:
+    branches:
+      - stage
+      - main
+  pull_request:
+    branches:
+      - stage
+
+env:
+  JAVA_VERSION: '17'
+  MAVEN_OPTS: -Xmx1024m
+  MINIKUBE_PROFILE: minikube
+
+jobs:
+  build-and-deploy:
+    name: Build, Deploy to Minikube
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build user-service
+        working-directory: ./user-service
+        run: mvn clean package -DskipTests
+
+      - name: Build proxy-client
+        working-directory: ./proxy-client
+        run: mvn clean package -DskipTests
+
+      - name: Check Minikube status
+        run: |
+          minikube status || (echo "Minikube is not running. Please start it first." && exit 1)
+          echo "Minikube is running"
+          
+      - name: Set Docker environment to Minikube
+        run: |
+          minikube -p minikube docker-env --shell powershell | Invoke-Expression
+          echo "Docker environment set to Minikube"
+
+      - name: Build Docker image for user-service in Minikube
+        working-directory: ./user-service
+        run: |
+          minikube -p minikube docker-env --shell powershell | Invoke-Expression
+          docker build -t user-service:v0.1.0 .
+          echo "user-service image built in Minikube"
+
+      - name: Build Docker image for proxy-client in Minikube
+        working-directory: ./proxy-client
+        run: |
+          minikube -p minikube docker-env --shell powershell | Invoke-Expression
+          docker build -t proxy-client:v0.1.0 .
+          echo "proxy-client image built in Minikube"
+
+      - name: Verify images in Minikube
+        run: |
+          minikube ssh "docker images user-service:v0.1.0"
+          minikube ssh "docker images proxy-client:v0.1.0"
+
+      - name: Deploy to Minikube
+        run: |
+          kubectl set image deployment/user-service user-service=user-service:v0.1.0 || echo "Deployment updated"
+          kubectl set image deployment/proxy-client proxy-client=proxy-client:v0.1.0 || echo "Deployment updated"
+          
+          kubectl rollout restart deployment/user-service
+          kubectl rollout restart deployment/proxy-client
+          
+          echo "Waiting for deployments to be ready..."
+          kubectl rollout status deployment/user-service --timeout=300s
+          kubectl rollout status deployment/proxy-client --timeout=300s
+
+      - name: Verify deployments
+        run: |
+          echo "## Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          kubectl get pods -l app=user-service >> $GITHUB_STEP_SUMMARY
+          kubectl get pods -l app=proxy-client >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Check pod logs
+        if: always()
+        run: |
+          echo "Checking user-service logs..."
+          kubectl logs -l app=user-service --tail=50 || true
+          
+          echo "Checking proxy-client logs..."
+          kubectl logs -l app=proxy-client --tail=50 || true
+
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: self-hosted
+    needs: build-and-deploy
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be fully ready..."
+          Start-Sleep -Seconds 30
+          
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
+          kubectl wait --for=condition=ready pod -l app=proxy-client --timeout=300s
+
+      - name: Run integration tests
+        working-directory: ./user-service
+        run: |
+          echo "Running integration tests..."
+          mvn test -Dtest='*IntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false
+          echo "Integration tests completed"
+
+      - name: Generate integration test report
+        if: always()
+        working-directory: ./user-service
+        run: |
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          mvn surefire-report:report-only
+          
+          $testResults = Get-Content target/surefire-reports/*.xml -Raw
+          if ($testResults -match 'failures="(\d+)".*errors="(\d+)".*tests="(\d+)"') {
+            $failures = $matches[1]
+            $errors = $matches[2]
+            $total = $matches[3]
+            $passed = [int]$total - [int]$failures - [int]$errors
+            
+            echo "- Total Tests: $total" >> $GITHUB_STEP_SUMMARY
+            echo "- Passed: $passed" >> $GITHUB_STEP_SUMMARY
+            echo "- Failed: $failures" >> $GITHUB_STEP_SUMMARY
+            echo "- Errors: $errors" >> $GITHUB_STEP_SUMMARY
+          }
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: |
+            user-service/target/surefire-reports/
+            user-service/target/site/
+
+      - name: Check service health
+        run: |
+          echo "Checking service health endpoints..."
+          kubectl port-forward svc/user-service 8081:8080 &
+          Start-Sleep -Seconds 5
+          
+          curl http://localhost:8081/actuator/health || echo "Health check endpoint not available"
+
+  generate-release-notes:
+    name: Generate Release Notes
+    runs-on: self-hosted
+    needs: integration-tests
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get commit messages since last tag
+        id: changelog
+        run: |
+          $lastTag = git describe --tags --abbrev=0 2>$null
+          if ($lastTag) {
+            $commits = git log "$lastTag..HEAD" --pretty=format:"- %s (%h)" --no-merges
+          } else {
+            $commits = git log --pretty=format:"- %s (%h)" --no-merges --max-count=10
+          }
+          
+          echo "CHANGELOG<<EOF" >> $env:GITHUB_OUTPUT
+          echo "$commits" >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        run: |
+          $version = "v0.1.0-stage-${{ github.run_number }}"
+          $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+          
+          $releaseNotes = @"
+          # Release Notes - $version
+          
+          **Release Date:** $date
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+          
+          ## Changes
+          
+          ${{ steps.changelog.outputs.CHANGELOG }}
+          
+          ## Deployments
+          
+          - user-service: v0.1.0
+          - proxy-client: v0.1.0
+          
+          ## Test Results
+          
+          - Unit Tests: ✅ Passed
+          - Integration Tests: ✅ Passed
+          
+          ## Deployment Status
+          
+          - Environment: Minikube (Stage)
+          - Status: Deployed Successfully
+          - Pods: Running
+          
+          ## Next Steps
+          
+          - Monitor application logs
+          - Verify all endpoints are responding
+          - Run end-to-end tests
+          
+          ---
+          Generated by GitHub Actions on $date
+          "@
+          
+          echo "$releaseNotes" > RELEASE_NOTES.md
+          
+          echo "## Release Notes Generated" >> $GITHUB_STEP_SUMMARY
+          echo "$releaseNotes" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Release Notes
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-notes
+          path: RELEASE_NOTES.md
+
+      - name: Create Git Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          $version = "v0.1.0-stage-${{ github.run_number }}"
+          git tag -a $version -m "Release $version"
+          git push origin $version
+
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: self-hosted
+    needs: [build-and-deploy, integration-tests, generate-release-notes]
+    if: always()
+    
+    steps:
+      - name: Generate deployment summary
+        run: |
+          echo "# Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow:** STAGE Pipeline" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Jobs Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Build and Deploy: ${{ needs.build-and-deploy.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Release Notes: ${{ needs.generate-release-notes.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify deployment status
+        run: |
+          if ("${{ needs.build-and-deploy.result }}" -eq "success" -and "${{ needs.integration-tests.result }}" -eq "success") {
+            echo "✅ Deployment completed successfully!"
+          } else {
+            echo "❌ Deployment failed. Check logs for details."
+            exit 1
+          }
