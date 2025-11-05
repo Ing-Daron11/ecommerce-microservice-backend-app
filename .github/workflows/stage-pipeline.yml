@@ -105,7 +105,7 @@ jobs:
         continue-on-error: true
         run: |
           Write-Host "Running integration tests..."
-          mvn test -Dtest='*IntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false
+          mvn test -Dtest='*IntegrationTest'
           Write-Host "Integration tests completed"
 
       - name: Generate integration test report

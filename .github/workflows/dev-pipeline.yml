@@ -47,7 +47,7 @@ jobs:
       - name: Run unit tests for user-service
         working-directory: ./user-service
         run: |
-          mvn test -Dtest='!*IntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false
+          mvn test -Dtest='!*IntegrationTest'
           echo "Unit tests completed"
 
       - name: Generate test report
