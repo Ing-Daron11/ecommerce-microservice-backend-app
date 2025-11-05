@@ -77,9 +77,8 @@ jobs:
 
       - name: Build Docker images
         run: |
-          echo "Building user-service Docker image..."
-          cd user-service
-          docker build -t user-service:dev-${{ github.sha }} .
+          Write-Host "Building user-service Docker image..."
+          docker build -f user-service/Dockerfile -t user-service:dev-${{ github.sha }} .
 
       - name: List Docker images
         run: docker images | grep user-service
