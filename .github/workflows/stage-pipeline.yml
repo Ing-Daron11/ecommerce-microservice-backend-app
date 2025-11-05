@@ -170,8 +170,8 @@ jobs:
           $commit = "${{ github.sha }}"
           $branch = "${{ github.ref_name }}"
           
-          $releaseNotes = @"
-# Release Notes - $version
+          $releaseNotes = @`
+"# Release Notes - $version
 
 **Release Date:** $date
 **Branch:** $branch
