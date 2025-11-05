@@ -70,12 +70,18 @@ jobs:
         run: |
           Write-Host "Deploying to Kubernetes..."
           
-          kubectl set image deployment/user-service user-service=user-service:v0.1.0 --record 2>$null || Write-Host "Deployment may need creation"
-          kubectl set image deployment/proxy-client proxy-client=proxy-client:v0.1.0 --record 2>$null || Write-Host "Deployment may need creation"
+          kubectl set image deployment/user-service user-service=user-service:v0.1.0 --record 2>$null
+          if ($LASTEXITCODE -ne 0) { Write-Host "Deployment may need creation" }
+          
+          kubectl set image deployment/proxy-client proxy-client=proxy-client:v0.1.0 --record 2>$null
+          if ($LASTEXITCODE -ne 0) { Write-Host "Deployment may need creation" }
           
           Write-Host "Restarting deployments..."
-          kubectl rollout restart deployment/user-service 2>$null || Write-Host "user-service deployment restarted or created"
-          kubectl rollout restart deployment/proxy-client 2>$null || Write-Host "proxy-client deployment restarted or created"
+          kubectl rollout restart deployment/user-service 2>$null
+          if ($LASTEXITCODE -ne 0) { Write-Host "user-service deployment restarted or created" }
+          
+          kubectl rollout restart deployment/proxy-client 2>$null
+          if ($LASTEXITCODE -ne 0) { Write-Host "proxy-client deployment restarted or created" }
           
           Write-Host "Waiting for deployments to stabilize..."
           Start-Sleep -Seconds 15
@@ -126,11 +132,12 @@ jobs:
 
       - name: Check service health
         run: |
-          echo "Checking service health endpoints..."
+          Write-Host "Checking service health endpoints..."
           kubectl port-forward svc/user-service 8081:8080 &
           Start-Sleep -Seconds 5
           
-          curl http://localhost:8081/actuator/health || echo "Health check endpoint not available"
+          curl http://localhost:8081/actuator/health
+          if ($LASTEXITCODE -ne 0) { Write-Host "Health check endpoint not available" }
 
   generate-release-notes:
     name: Generate Release Notes
