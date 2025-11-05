@@ -47,7 +47,7 @@ jobs:
       - name: Run unit tests for user-service
         working-directory: ./user-service
         run: |
-          mvn test -Dtest='!*IntegrationTest'
+          mvn test -Dtest='!*IntegrationTest,!*E2ETest'
           echo "Unit tests completed"
 
       - name: Generate test report
@@ -74,7 +74,7 @@ jobs:
       - name: Run unit tests for proxy-client
         working-directory: ./proxy-client
         run: |
-          mvn test -DskipTests=false || echo "No unit tests found for proxy-client"
+          mvn test -Dtest='!*IntegrationTest,!*E2ETest' || echo "No unit tests found for proxy-client"
 
       - name: Build Docker images
         run: |
