@@ -15,6 +15,7 @@ import com.selimhorri.app.exception.payload.ExceptionMsg;
 import com.selimhorri.app.exception.wrapper.DuplicateEntityException;
 import com.selimhorri.app.exception.wrapper.FavouriteNotFoundException;
 import com.selimhorri.app.exception.wrapper.InvalidFavouriteDataException;
+import com.selimhorri.app.exception.wrapper.InvalidFavouriteOperationException;
 import com.selimhorri.app.exception.wrapper.ProductNotFoundException;
 import com.selimhorri.app.exception.wrapper.UserNotFoundException;
 
@@ -100,5 +101,23 @@ public class ApiExceptionHandler {
 						.build(),
 				badRequest);
 	}
+
+		    @ExceptionHandler(value = {
+			    InvalidFavouriteOperationException.class
+		    })
+		    public <T extends RuntimeException> ResponseEntity<ExceptionMsg> handleInvalidOperationException(final T e) {
+
+			log.info("**ApiExceptionHandler controller, handle invalid operation exception*\n");
+			final var status = HttpStatus.UNPROCESSABLE_ENTITY;
+
+			return new ResponseEntity<>(
+				ExceptionMsg.builder()
+					.msg("#### " + e.getMessage() + "! ####")
+					.httpStatus(status)
+					.timestamp(ZonedDateTime
+						.now(ZoneId.systemDefault()))
+					.build(),
+				status);
+		    }
 
 }

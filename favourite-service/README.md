@@ -75,10 +75,15 @@ Entidad con **clave compuesta** (userId, productId, likeDate):
    - Se lanza cuando intenta crear un favorito que ya existe
    - Status HTTP: 409 CONFLICT
 
-5. **InvalidFavouriteDataException** (nueva):
+5. **InvalidFavouriteDataException**
    - Se lanza para datos inválidos de favorito
    - Status HTTP: 400 BAD_REQUEST
    - Disponible para futuras validaciones
+ 
+6. **InvalidFavouriteOperationException**
+   - Se lanza cuando una operación sobre favorito no es permitida en el contexto actual
+   - Ejemplo: intento de operación que viola reglas de negocio o estado del sistema
+   - Status HTTP: 422 UNPROCESSABLE_ENTITY
 
 ## Comunicación Inter-Microservicios
 
