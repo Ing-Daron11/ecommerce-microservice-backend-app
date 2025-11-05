@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.selimhorri.app.exception.payload.ExceptionMsg;
+import com.selimhorri.app.exception.wrapper.InvalidPaymentStatusException;
 import com.selimhorri.app.exception.wrapper.PaymentServiceException;
 
 import lombok.RequiredArgsConstructor;
@@ -77,6 +78,24 @@ public class ApiExceptionHandler {
 								.now(ZoneId.systemDefault()))
 						.build(),
 				badRequest);
+	}
+
+	@ExceptionHandler(value = {
+			InvalidPaymentStatusException.class,
+	})
+	public <T extends RuntimeException> ResponseEntity<ExceptionMsg> handleInvalidPaymentStatusException(final T e) {
+
+		log.info("**ApiExceptionHandler controller, handle invalid payment status exception*\n");
+		final var unprocessableEntity = HttpStatus.UNPROCESSABLE_ENTITY;
+
+		return new ResponseEntity<>(
+				ExceptionMsg.builder()
+						.msg("#### " + e.getMessage() + "! ####")
+						.httpStatus(unprocessableEntity)
+						.timestamp(ZonedDateTime
+								.now(ZoneId.systemDefault()))
+						.build(),
+				unprocessableEntity);
 	}
 
 }
