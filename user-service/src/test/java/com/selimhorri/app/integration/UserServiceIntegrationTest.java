@@ -2,6 +2,7 @@ package com.selimhorri.app.integration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// Integration tests for User-Credential communication
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

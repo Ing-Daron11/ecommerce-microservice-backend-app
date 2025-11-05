@@ -3,11 +3,12 @@ name: STAGE Pipeline - Build, Deploy to Minikube and Integration Tests
 on:
   push:
     branches:
-      - stage
-      - main
-  pull_request:
-    branches:
-      - stage
+      - master
+    paths:
+      - 'user-service/**'
+      - 'proxy-client/**'
+      - '.github/workflows/stage-pipeline.yml'
+  workflow_dispatch:
 
 env:
   JAVA_VERSION: '17'

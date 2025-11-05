@@ -3,11 +3,12 @@ name: DEV Pipeline - Build and Unit Tests
 on:
   push:
     branches:
-      - dev
-      - feature/*
-  pull_request:
-    branches:
-      - dev
+      - master
+    paths:
+      - 'user-service/**'
+      - 'proxy-client/**'
+      - '.github/workflows/dev-pipeline.yml'
+  workflow_dispatch:
 
 env:
   JAVA_VERSION: '17'
