@@ -68,10 +68,10 @@ jobs:
         run: |
           Write-Host "Deploying to Kubernetes..."
           
-          kubectl set image deployment/user-service user-service=user-service:v0.1.0 --record 2>$null
+          kubectl set image deployment/user-service user-service=user-service:v0.1.0 2>$null
           if ($LASTEXITCODE -ne 0) { Write-Host "Deployment may need creation" }
           
-          kubectl set image deployment/proxy-client proxy-client=proxy-client:v0.1.0 --record 2>$null
+          kubectl set image deployment/proxy-client proxy-client=proxy-client:v0.1.0 2>$null
           if ($LASTEXITCODE -ne 0) { Write-Host "Deployment may need creation" }
           
           Write-Host "Restarting deployments..."
