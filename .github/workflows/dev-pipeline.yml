@@ -80,13 +80,9 @@ jobs:
           echo "Building user-service Docker image..."
           cd user-service
           docker build -t user-service:dev-${{ github.sha }} .
-          
-          echo "Building proxy-client Docker image..."
-          cd ../proxy-client
-          docker build -t proxy-client:dev-${{ github.sha }} .
 
       - name: List Docker images
-        run: docker images | grep -E 'user-service|proxy-client'
+        run: docker images | grep user-service
 
       - name: Clean up old images
         run: |
