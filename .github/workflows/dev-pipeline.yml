@@ -50,6 +50,10 @@ jobs:
           mvn test -Dtest='!*IntegrationTest,!*E2ETest'
           echo "Unit tests completed"
 
+      - name: Package user-service
+        working-directory: ./user-service
+        run: mvn package -DskipTests
+
       - name: Generate test report
         if: always()
         working-directory: ./user-service
@@ -66,6 +70,10 @@ jobs:
             user-service/target/surefire-reports/
             user-service/target/site/
           retention-days: 30
+
+      - name: Build proxy-client (package only)
+        working-directory: ./proxy-client
+        run: mvn clean package -DskipTests
 
       - name: Build Docker images
         run: |
