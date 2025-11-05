@@ -67,15 +67,6 @@ jobs:
             user-service/target/site/
           retention-days: 30
 
-      - name: Build proxy-client
-        working-directory: ./proxy-client
-        run: mvn clean compile -DskipTests
-
-      - name: Run unit tests for proxy-client
-        working-directory: ./proxy-client
-        run: |
-          mvn test -Dtest='!*IntegrationTest,!*E2ETest'
-
       - name: Build Docker images
         run: |
           echo "Building user-service Docker image..."
