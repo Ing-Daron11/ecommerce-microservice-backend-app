@@ -8,7 +8,7 @@ spring:
     base-url: ${SPRING_ZIPKIN_BASE_URL:http://zipkin:9411/}
     sender:
       type: web
-    enabled: false
+    enabled: true
   config:
     import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:9296}
   application:
