@@ -68,7 +68,7 @@ mvn clean package -DskipTests
 
  **Iniciar Minikube**
 ```bash
-minikube start --driver=docke
+minikube start --driver=docker
 ```
 
  **Compilar imágenes Docker**
