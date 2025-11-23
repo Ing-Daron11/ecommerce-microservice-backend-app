@@ -79,6 +79,10 @@ cd <service>
 docker build -t <service>:v0.1.0 .
 cd ..
 ```
+O
+```bash
+docker build -t <service>:v0.1.0 -f <service>/Dockerfile .
+```
 Ejemplo con el cloud-config:
 ![alt text](image-2.png)
 

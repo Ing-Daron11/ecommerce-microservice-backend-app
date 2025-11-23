@@ -1,0 +1,1 @@
+ALTER TABLE order_items ADD COLUMN is_active BOOLEAN DEFAULT true NOT NULL;

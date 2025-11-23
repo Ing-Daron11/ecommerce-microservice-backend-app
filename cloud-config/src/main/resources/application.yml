@@ -55,6 +55,11 @@ resilience4j:
         wait-duration-in-open-state: 5s
         sliding-window-type: COUNT_BASED
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-discovery:8761/eureka/}
+
 
 
 
