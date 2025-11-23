@@ -13,7 +13,7 @@ spring:
     sampler:
       probability: 1.0
   config:
-    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:9296}
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://cloud-config:9296}
   application:
     name: API-GATEWAY
   profiles:
@@ -91,6 +91,11 @@ management:
   endpoint:
     health:
       show-details: always
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-discovery:8761/eureka/}
 
 
 

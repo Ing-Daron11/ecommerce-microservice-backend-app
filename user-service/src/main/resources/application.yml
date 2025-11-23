@@ -13,7 +13,7 @@ spring:
     sampler:
       probability: 1.0
   config:
-    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:9296}
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://cloud-config:9296}
   application:
     name: USER-SERVICE
   profiles:
@@ -33,6 +33,11 @@ resilience4j:
         sliding-window-size: 10
         wait-duration-in-open-state: 5s
         sliding-window-type: COUNT_BASED
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-discovery:8761/eureka/}
 
 management:
   health:
