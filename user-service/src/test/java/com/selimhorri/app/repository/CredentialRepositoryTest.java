@@ -57,7 +57,7 @@ class CredentialRepositoryTest {
     @Test
     @DisplayName("Should find credential by username")
     void testFindByUsername() {
-        Optional<Credential> found = credentialRepository.findByUsername("johndoe");
+        Optional<Credential> found = credentialRepository.findFirstByUsername("johndoe");
 
         assertTrue(found.isPresent());
         assertEquals("johndoe", found.get().getUsername());
@@ -67,7 +67,7 @@ class CredentialRepositoryTest {
     @Test
     @DisplayName("Should return empty when username not found")
     void testFindByUsernameNotFound() {
-        Optional<Credential> found = credentialRepository.findByUsername("nonexistent");
+        Optional<Credential> found = credentialRepository.findFirstByUsername("nonexistent");
 
         assertTrue(found.isEmpty());
     }
@@ -106,7 +106,7 @@ class CredentialRepositoryTest {
     @Test
     @DisplayName("Should retrieve credential with all enabled flags true")
     void testCredentialEnabledFlags() {
-        Optional<Credential> found = credentialRepository.findByUsername("johndoe");
+        Optional<Credential> found = credentialRepository.findFirstByUsername("johndoe");
 
         assertTrue(found.isPresent());
         assertTrue(found.get().getIsEnabled());
@@ -118,7 +118,7 @@ class CredentialRepositoryTest {
     @Test
     @DisplayName("Should update credential password")
     void testUpdateCredentialPassword() {
-        Optional<Credential> found = credentialRepository.findByUsername("johndoe");
+        Optional<Credential> found = credentialRepository.findFirstByUsername("johndoe");
         assertTrue(found.isPresent());
 
         Credential credential = found.get();
@@ -127,7 +127,7 @@ class CredentialRepositoryTest {
 
         credentialRepository.save(credential);
 
-        Optional<Credential> updated = credentialRepository.findByUsername("johndoe");
+        Optional<Credential> updated = credentialRepository.findFirstByUsername("johndoe");
         assertTrue(updated.isPresent());
         assertNotEquals(oldPassword, updated.get().getPassword());
         assertEquals("$2a$10$newHashedPassword", updated.get().getPassword());

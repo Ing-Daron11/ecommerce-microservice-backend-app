@@ -292,8 +292,9 @@ minikube dashboard
 
 ---
 
-## Autor
-Daron - Semestre VIII - Ingeniería de Software 5
+## Autores 
+Daron Mercado - Semestre VIII - Ingeniería de Software 5
+Miguel Angel Martinez - Semestre VIII - Ingeniería de Software 5
 
 **Última actualización:** Noviembre 5, 2025
 
