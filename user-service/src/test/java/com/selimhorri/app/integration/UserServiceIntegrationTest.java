@@ -92,7 +92,7 @@ class UserServiceIntegrationTest {
         credentialRepository.save(credential);
         entityManager.flush();
 
-        Credential foundCredential = credentialRepository.findByUsername("integration@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("integration@test.com").orElse(null);
 
         assertNotNull(foundCredential);
         assertEquals(user.getUserId(), foundCredential.getUser().getUserId());
@@ -106,7 +106,7 @@ class UserServiceIntegrationTest {
         credentialRepository.save(credential);
         entityManager.flush();
 
-        Credential foundCredential = credentialRepository.findByUsername("integration@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("integration@test.com").orElse(null);
 
         assertNotNull(foundCredential);
         assertNotNull(foundCredential.getPassword());
@@ -121,7 +121,7 @@ class UserServiceIntegrationTest {
         credentialRepository.save(credential);
         entityManager.flush();
 
-        Credential foundCredential = credentialRepository.findByUsername("integration@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("integration@test.com").orElse(null);
 
         assertNotNull(foundCredential);
         assertTrue(foundCredential.getIsEnabled());

@@ -40,6 +40,8 @@ spec:
           value: "-Deureka.client.serviceUrl.defaultZone=http://service-discovery:8761/eureka/"
         - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
           value: "true"
+        - name: FEATURE_PRODUCTS_READONLY
+          value: "false"
         livenessProbe:
           httpGet:
             path: /app/actuator/health

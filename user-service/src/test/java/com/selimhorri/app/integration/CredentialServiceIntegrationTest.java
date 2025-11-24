@@ -77,7 +77,7 @@ class CredentialServiceIntegrationTest {
         User persistedUser = userRepository.findById(user.getUserId()).orElse(null);
         assertNotNull(persistedUser);
 
-        Credential foundCredential = credentialRepository.findByUsername("credtest@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("credtest@test.com").orElse(null);
         assertNotNull(foundCredential);
         assertEquals(persistedUser.getUserId(), foundCredential.getUser().getUserId());
     }
@@ -90,7 +90,7 @@ class CredentialServiceIntegrationTest {
         credentialRepository.save(credential);
         entityManager.flush();
 
-        Credential foundCredential = credentialRepository.findByUsername("credtest@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("credtest@test.com").orElse(null);
         assertNotNull(foundCredential);
         assertNotNull(foundCredential.getPassword());
         assertTrue(foundCredential.getPassword().startsWith("$2a$"));
@@ -104,7 +104,7 @@ class CredentialServiceIntegrationTest {
         credentialRepository.save(credential);
         entityManager.flush();
 
-        Credential foundCredential = credentialRepository.findByUsername("credtest@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("credtest@test.com").orElse(null);
         assertNotNull(foundCredential);
         assertTrue(foundCredential.getIsEnabled());
         assertTrue(foundCredential.getIsAccountNonExpired());
@@ -118,7 +118,7 @@ class CredentialServiceIntegrationTest {
         credentialRepository.save(credential);
         entityManager.flush();
 
-        Credential foundCredential = credentialRepository.findByUsername("credtest@test.com").orElse(null);
+        Credential foundCredential = credentialRepository.findFirstByUsername("credtest@test.com").orElse(null);
         assertNotNull(foundCredential);
         assertTrue(foundCredential.getIsEnabled());
         assertTrue(foundCredential.getIsAccountNonExpired());
