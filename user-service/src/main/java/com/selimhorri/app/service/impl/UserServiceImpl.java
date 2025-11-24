@@ -84,14 +84,54 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto update(final UserDto userDto) {
 		log.info("*** UserDto, service; update user *");
-		return UserMappingHelper.map(this.userRepository.save(UserMappingHelper.map(userDto)));
+		
+		if (userDto.getUserId() != null) {
+			User existingUser = this.userRepository.findById(userDto.getUserId())
+			   .orElseThrow(() -> new UserObjectNotFoundException(String.format("User with id: %d not found", userDto.getUserId())));
+			
+			if (userDto.getCredentialDto() != null && userDto.getCredentialDto().getCredentialId() == null) {
+			   if (existingUser.getCredential() != null) {
+				   userDto.getCredentialDto().setCredentialId(existingUser.getCredential().getCredentialId());
+			   }
+		   }
+	   }
+
+		User user = UserMappingHelper.map(userDto);
+		
+		if (user.getCredential() != null) {
+			user.getCredential().setUser(user);
+		}
+		if (user.getAddresses() != null) {
+			user.getAddresses().forEach(address -> address.setUser(user));
+		}
+		
+		return UserMappingHelper.map(this.userRepository.save(user));
 	}
 
 	@Override
 	public UserDto update(final Integer userId, final UserDto userDto) {
 		log.info("*** UserDto, service; update user with userId *");
-		return UserMappingHelper.map(this.userRepository.save(
-				UserMappingHelper.map(this.findById(userId))));
+		User existingUser = this.userRepository.findById(userId)
+				.orElseThrow(() -> new UserObjectNotFoundException(String.format("User with id: %d not found", userId)));
+		
+		userDto.setUserId(userId);
+		
+		if (userDto.getCredentialDto() != null && userDto.getCredentialDto().getCredentialId() == null) {
+			if (existingUser.getCredential() != null) {
+				userDto.getCredentialDto().setCredentialId(existingUser.getCredential().getCredentialId());
+			}
+		}
+		
+		User user = UserMappingHelper.map(userDto);
+		
+		if (user.getCredential() != null) {
+			user.getCredential().setUser(user);
+		}
+		if (user.getAddresses() != null) {
+			user.getAddresses().forEach(address -> address.setUser(user));
+		}
+		
+		return UserMappingHelper.map(this.userRepository.save(user));
 	}
 
 	@Override

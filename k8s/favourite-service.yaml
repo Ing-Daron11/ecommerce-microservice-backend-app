@@ -22,11 +22,11 @@ spec:
         - containerPort: 8800
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "128Mi"
+            cpu: "50m"
           limits:
-            memory: "1Gi"
-            cpu: "1000m"
+            memory: "384Mi"
+            cpu: "500m"
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "dev"
@@ -36,6 +36,8 @@ spec:
           value: "optional:configserver:http://cloud-config:9296"
         - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           value: "http://service-discovery:8761/eureka/"
+        - name: JAVA_TOOL_OPTIONS
+          value: "-Deureka.client.serviceUrl.defaultZone=http://service-discovery:8761/eureka/"
         - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
           value: "true"
         livenessProbe:

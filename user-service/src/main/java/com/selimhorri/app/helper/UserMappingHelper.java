@@ -38,6 +38,7 @@ public interface UserMappingHelper {
 				.email(userDto.getEmail())
 				.phone(userDto.getPhone())
 				.credential(
+						userDto.getCredentialDto() != null ?
 						Credential.builder()
 								.credentialId(userDto.getCredentialDto().getCredentialId())
 								.username(userDto.getCredentialDto().getUsername())
@@ -47,7 +48,7 @@ public interface UserMappingHelper {
 								.isAccountNonExpired(userDto.getCredentialDto().getIsAccountNonExpired())
 								.isAccountNonLocked(userDto.getCredentialDto().getIsAccountNonLocked())
 								.isCredentialsNonExpired(userDto.getCredentialDto().getIsCredentialsNonExpired())
-								.build())
+								.build() : null)
 				.build();
 	}
 
