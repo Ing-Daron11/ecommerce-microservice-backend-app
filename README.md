@@ -244,8 +244,7 @@ powershell -ExecutionPolicy Bypass -File generate-zipkin-traffic.ps1
 
 Ir a "Dependencies" en Zipkin para visualizar el grafo de microservicios.
 
-![alt text](image-7.png)
-
+![alt text](image-8.png)
 ---
 
 ## 8. Documentación por Servicio
