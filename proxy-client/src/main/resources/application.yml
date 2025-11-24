@@ -20,10 +20,14 @@ spring:
     active:
     - dev
 
+feature:
+  products:
+    readonly: false
+
 resilience4j:
   circuitbreaker:
     instances:
-      apiProxy:
+      productClientService:
         register-health-indicator: true
         event-consumer-buffer-size: 10
         automatic-transition-from-open-to-half-open-enabled: true
@@ -33,6 +37,10 @@ resilience4j:
         sliding-window-size: 10
         wait-duration-in-open-state: 5s
         sliding-window-type: COUNT_BASED
+
+feign:
+  circuitbreaker:
+    enabled: true
 
 eureka:
   client:

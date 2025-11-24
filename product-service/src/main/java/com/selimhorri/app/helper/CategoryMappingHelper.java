@@ -27,15 +27,14 @@ public interface CategoryMappingHelper {
 	
 	public static Category map(final CategoryDto categoryDto) {
 		
-		final var parentCategoryDto = Optional.ofNullable(categoryDto
-				.getParentCategoryDto()).orElseGet(() -> new CategoryDto());
+		final var parentCategoryDto = categoryDto.getParentCategoryDto();
 		
 		return Category.builder()
 				.categoryId(categoryDto.getCategoryId())
 				.categoryTitle(categoryDto.getCategoryTitle())
 				.imageUrl(categoryDto.getImageUrl())
 				.parentCategory(
-						Category.builder()
+						(parentCategoryDto == null || parentCategoryDto.getCategoryId() == null) ? null : Category.builder()
 							.categoryId(parentCategoryDto.getCategoryId())
 							.categoryTitle(parentCategoryDto.getCategoryTitle())
 							.imageUrl(parentCategoryDto.getImageUrl())
