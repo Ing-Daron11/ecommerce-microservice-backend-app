@@ -112,7 +112,7 @@ class CredentialServiceImplTest {
 
     @Test
     void shouldFindCredentialByUsername() {
-        given(credentialRepository.findByUsername("johndoe")).willReturn(Optional.of(credential));
+        given(credentialRepository.findFirstByUsername("johndoe")).willReturn(Optional.of(credential));
 
         CredentialDto result = credentialService.findByUsername("johndoe");
 
@@ -122,7 +122,7 @@ class CredentialServiceImplTest {
 
     @Test
     void shouldThrowExceptionWhenCredentialNotFoundByUsername() {
-        given(credentialRepository.findByUsername(anyString())).willReturn(Optional.empty());
+        given(credentialRepository.findFirstByUsername(anyString())).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> credentialService.findByUsername("unknown"))
                 .isInstanceOf(UserObjectNotFoundException.class)
