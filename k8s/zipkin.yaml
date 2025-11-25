@@ -35,12 +35,11 @@ kind: Service
 metadata:
   name: zipkin
 spec:
-  type: NodePort  # Usamos NodePort para poder acceder desde fuera del cluster
+  type: LoadBalancer
   selector:
     app: zipkin
   ports:
   - name: http
     port: 9411
     targetPort: 9411
-    nodePort: 30941  # Puerto externo para acceder via minikube
 
