@@ -22,7 +22,7 @@ spec:
         resources:
           requests:
             memory: "128Mi"
-            cpu: "250m"
+            cpu: "100m"
           limits:
             memory: "384Mi"
             cpu: "500m"
@@ -43,3 +43,4 @@ spec:
     port: 9411
     targetPort: 9411
     nodePort: 30941  # Puerto externo para acceder via minikube
+
