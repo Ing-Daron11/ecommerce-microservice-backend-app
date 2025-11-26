@@ -1,2 +1,2 @@
 prefix   = "ecommerce-prod"
-location = "eastus"
+location = "westus"
