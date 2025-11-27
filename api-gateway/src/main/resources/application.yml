@@ -39,31 +39,73 @@ spring:
               - PATCH
               - OPTIONS
       routes:
-      - id: ORDER-SERVICE
+      - id: ORDER-SERVICE-API
+        uri: lb://ORDER-SERVICE
+        predicates:
+        - Path=/api/orders/**
+        filters:
+        - PrefixPath=/order-service
+      - id: ORDER-SERVICE-LEGACY
         uri: lb://ORDER-SERVICE
         predicates:
         - Path=/order-service/**
-      - id: USER-SERVICE
+      - id: USER-SERVICE-API
+        uri: lb://USER-SERVICE
+        predicates:
+        - Path=/api/users/**
+        filters:
+        - PrefixPath=/user-service
+      - id: USER-SERVICE-LEGACY
         uri: lb://USER-SERVICE
         predicates:
         - Path=/user-service/**
-      - id: PAYMENT-SERVICE
+      - id: PAYMENT-SERVICE-API
+        uri: lb://PAYMENT-SERVICE
+        predicates:
+        - Path=/api/payments/**
+        filters:
+        - PrefixPath=/payment-service
+      - id: PAYMENT-SERVICE-LEGACY
         uri: lb://PAYMENT-SERVICE
         predicates:
         - Path=/payment-service/**
-      - id: PRODUCT-SERVICE
+      - id: PRODUCT-SERVICE-API
+        uri: lb://PRODUCT-SERVICE
+        predicates:
+        - Path=/api/products/**
+        filters:
+        - PrefixPath=/product-service
+      - id: PRODUCT-SERVICE-LEGACY
         uri: lb://PRODUCT-SERVICE
         predicates:
         - Path=/product-service/**
-      - id: SHIPPING-SERVICE
+      - id: SHIPPING-SERVICE-API
+        uri: lb://SHIPPING-SERVICE
+        predicates:
+        - Path=/api/shippings/**
+        filters:
+        - PrefixPath=/shipping-service
+      - id: SHIPPING-SERVICE-LEGACY
         uri: lb://SHIPPING-SERVICE
         predicates:
         - Path=/shipping-service/**
-      - id: FAVOURITE-SERVICE
+      - id: FAVOURITE-SERVICE-API
+        uri: lb://FAVOURITE-SERVICE
+        predicates:
+        - Path=/api/favourites/**
+        filters:
+        - PrefixPath=/favourite-service
+      - id: FAVOURITE-SERVICE-LEGACY
         uri: lb://FAVOURITE-SERVICE
         predicates:
         - Path=/favourite-service/**
-      - id: PROXY-CLIENT
+      - id: PROXY-CLIENT-API
+        uri: lb://PROXY-CLIENT
+        predicates:
+        - Path=/api/app/**
+        filters:
+        - StripPrefix=1
+      - id: PROXY-CLIENT-LEGACY
         uri: lb://PROXY-CLIENT
         predicates:
         - Path=/app/**
