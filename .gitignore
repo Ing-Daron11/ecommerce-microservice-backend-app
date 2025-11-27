@@ -34,3 +34,10 @@ build/
 
 ### E2E Tests ###
 e2e/node_modules/
+
+### Terraform ###
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!terraform.tfvars

@@ -16,14 +16,14 @@ spec:
     spec:
       containers:
       - name: proxy-client
-        image: proxy-client:v0.1.0
-        imagePullPolicy: Never
+        image: ecommercestageacr.azurecr.io/proxy-client:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8900
         resources:
           requests:
             memory: "128Mi"
-            cpu: "50m"
+            cpu: "100m"
           limits:
             memory: "384Mi"
             cpu: "500m"
@@ -46,14 +46,14 @@ spec:
           httpGet:
             path: /app/actuator/health
             port: 8900
-          initialDelaySeconds: 180
+          initialDelaySeconds: 300
           periodSeconds: 15
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /app/actuator/health
             port: 8900
-          initialDelaySeconds: 160
+          initialDelaySeconds: 300
           periodSeconds: 10
           failureThreshold: 3
 ---
@@ -69,3 +69,7 @@ spec:
   - name: http
     port: 8900
     targetPort: 8900
+
+
+
+
