@@ -16,14 +16,14 @@ spec:
     spec:
       containers:
       - name: product-service
-        image: product-service:v0.1.0
-        imagePullPolicy: Never
+        image: ecommercestageacr.azurecr.io/product-service:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8500
         resources:
           requests:
             memory: "128Mi"
-            cpu: "50m"
+            cpu: "100m"
           limits:
             memory: "384Mi"
             cpu: "500m"
@@ -44,14 +44,14 @@ spec:
           httpGet:
             path: /product-service/actuator/health
             port: 8500
-          initialDelaySeconds: 180
+          initialDelaySeconds: 300
           periodSeconds: 15
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /product-service/actuator/health
             port: 8500
-          initialDelaySeconds: 160
+          initialDelaySeconds: 300
           periodSeconds: 10
           failureThreshold: 3
 ---
@@ -67,3 +67,7 @@ spec:
   - name: http
     port: 8500
     targetPort: 8500
+
+
+
+
