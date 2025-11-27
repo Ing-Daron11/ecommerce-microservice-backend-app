@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+### E2E Tests ###
+e2e/node_modules/
+
 ### Terraform ###
 .terraform/
 *.tfstate
