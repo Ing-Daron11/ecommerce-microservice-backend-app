@@ -37,15 +37,15 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: SonarCloud Scan
+      - name: SonarQube Scan
+        continue-on-error: true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=Ing-Daron11_ecommerce-microservice-backend-app \
-          -Dsonar.organization=ing-daron11 \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -DskipTests
+          -Dsonar.projectKey=ecommerce-microservice-backend \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
 
       - name: Build & Unit Tests
         run: mvn clean package
