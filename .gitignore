@@ -4,6 +4,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +37,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### E2E Tests ###
+e2e/node_modules/
+
+### Terraform ###
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!terraform.tfvars

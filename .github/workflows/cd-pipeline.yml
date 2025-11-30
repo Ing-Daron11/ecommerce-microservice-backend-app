@@ -1,0 +1,104 @@
+name: CD Pipeline - Deploy to Stage & Prod
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline - Build, Test & Security"]
+    types:
+      - completed
+  workflow_dispatch:
+
+env:
+  ACR_NAME: ecommercestageacr
+  # Use the SHA from the CI pipeline run if triggered by workflow_run, otherwise use the current commit SHA
+  IMAGE_TAG: ${{ github.event.workflow_run.head_sha || github.sha }} 
+
+jobs:
+  deploy-stage:
+    name: Deploy to STAGE & E2E Tests
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: 
+      name: stage
+      url: http://4.246.232.222:8080
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS Context (Stage)
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ecommerce-stage-rg
+          cluster-name: ecommerce-stage-aks
+
+      # Rollout Strategy: Update images in manifests and apply. Kubernetes handles the rolling update.
+      - name: Update Kubernetes Manifests
+        run: |
+          find k8s -name "*.yaml" -exec sed -i "s|ecommercestageacr.azurecr.io/\(.*\):.*|ecommercestageacr.azurecr.io/\1:${{ env.IMAGE_TAG }}|g" {} +
+
+      - name: Deploy to AKS (Stage)
+        run: |
+          kubectl apply -f k8s/
+      
+      - name: Wait for Rollout to Complete
+        run: |
+          echo "Waiting for pods to be ready (timeout 10m)..."
+          kubectl wait --for=condition=ready pod --all --timeout=600s || echo "Some pods are not ready yet, proceeding to tests anyway..."
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run E2E Tests
+        shell: pwsh
+        run: |
+          cd e2e
+          ./run-e2e-tests.ps1 -Environment azure -BaseUrl "http://4.246.232.222:8080"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Locust
+        run: pip install locust
+
+      - name: Run Load Tests (Locust)
+        run: |
+          locust -f tests/locust/locustfile.py --headless -u 10 -r 1 --run-time 1m --host http://4.246.232.222:8080
+
+  deploy-prod:
+    name: Deploy to PROD
+    needs: deploy-stage
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      url: http://52.160.122.32:8080
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS Context (Prod)
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ecommerce-prod-rg
+          cluster-name: ecommerce-prod-aks
+
+      # Rollout Strategy: Update images in manifests and apply. Kubernetes handles the rolling update.
+      - name: Update Kubernetes Manifests
+        run: |
+          find k8s -name "*.yaml" -exec sed -i "s|ecommercestageacr.azurecr.io/\(.*\):.*|ecommercestageacr.azurecr.io/\1:${{ env.IMAGE_TAG }}|g" {} +
+
+      - name: Deploy to AKS (Prod)
+        run: |
+          kubectl apply -f k8s/

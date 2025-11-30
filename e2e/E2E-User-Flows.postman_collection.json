@@ -1,0 +1,632 @@
+{
+  "info": {
+    "_postman_id": "e2e-ecommerce-flows",
+    "name": "E2E Ecommerce Microservices Tests",
+    "description": "End-to-End tests for complete user journeys in ecommerce microservices. Use {{base_url}} variable for different environments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. User Registration & Login",
+      "item": [
+        {
+          "name": "1.1 - Register New User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "if (!pm.environment.get('userEmail') || pm.environment.get('userEmail').includes('{{')) {",
+                  "    var timestamp = Date.now();",
+                  "    var email = 'testuser' + timestamp + '@example.com';",
+                  "    pm.environment.set('userEmail', email);",
+                  "    pm.environment.set('userPassword', 'TestPassword123!');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    var statusCode = pm.response.code;",
+                  "    pm.expect([200, 201]).to.include(statusCode);",
+                  "});",
+                  "",
+                  "pm.test('Response has userId', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('userId');",
+                  "    pm.environment.set('userId', jsonData.userId);",
+                  "});",
+                  "",
+                  "pm.test('User email exists', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{userEmail}}\",\n  \"phone\": \"555-1234\",\n  \"imageUrl\": \"https://example.com/image.jpg\",\n  \"addressDtos\": [{\n    \"fullAddress\": \"123 Main St\",\n    \"postalCode\": \"12345\",\n    \"city\": \"Test City\"\n  }],\n  \"credential\": {\n    \"username\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\",\n    \"roleBasedAuthority\": \"ROLE_USER\",\n    \"isEnabled\": true,\n    \"isAccountNonExpired\": true,\n    \"isAccountNonLocked\": true,\n    \"isCredentialsNonExpired\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/app/api/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "app",
+                "api",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.2 - User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has jwtToken', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('jwtToken');",
+                  "    pm.environment.set('authToken', jsonData.jwtToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/app/api/authenticate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "app",
+                "api",
+                "authenticate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Browse Products",
+      "item": [
+        {
+          "name": "2.1 - Get All Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has collection', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('collection');",
+                  "    pm.expect(jsonData.collection).to.be.an('array');",
+                  "    pm.expect(jsonData.collection.length).to.be.greaterThan(0);",
+                  "});",
+                  "",
+                  "pm.test('Store first product ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var firstProduct = jsonData.collection[0];",
+                  "    pm.environment.set('productId', firstProduct.productId);",
+                  "    pm.environment.set('productPrice', firstProduct.priceUnit);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.2 - Get Product Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Product details are complete', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('productId');",
+                  "    pm.expect(jsonData).to.have.property('productTitle');",
+                  "    pm.expect(jsonData).to.have.property('priceUnit');",
+                  "    pm.expect(jsonData).to.have.property('quantity');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products/{{productId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Add to Favorites",
+      "item": [
+        {
+          "name": "3.1 - Add Product to Favorites",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    var statusCode = pm.response.code;",
+                  "    pm.expect([200, 201]).to.include(statusCode);",
+                  "});",
+                  "",
+                  "pm.test('Favorite added successfully', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('userId');",
+                  "    pm.expect(jsonData).to.have.property('productId');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"productId\": \"{{productId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/favourites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "favourites"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 - Get User Favorites",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Favorites collection is returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('collection');",
+                  "    pm.expect(jsonData.collection).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/favourites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "favourites"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Create Order",
+      "item": [
+        {
+          "name": "4.1 - Create New Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Can retrieve existing orders', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Orders have collection', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('collection');",
+                  "    pm.expect(jsonData.collection).to.be.an('array');",
+                  "    if (jsonData.collection.length > 0) {",
+                  "        pm.environment.set('orderId', jsonData.collection[0].orderId);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.2 - Get Order Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Order details are complete', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('orderId');",
+                  "    pm.expect(jsonData).to.have.property('orderDesc');",
+                  "    pm.expect(jsonData).to.have.property('orderStatus');",
+                  "    pm.expect(jsonData).to.have.property('cart');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/{{orderId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Process Payment",
+      "item": [
+        {
+          "name": "5.1 - Create Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Can retrieve existing payments', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Payments collection returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('collection');",
+                  "    pm.expect(jsonData.collection).to.be.an('array');",
+                  "    if (jsonData.collection.length > 0) {",
+                  "        pm.environment.set('paymentId', jsonData.collection[0].paymentId);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.2 - Get Payment Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Payment list returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('collection');",
+                  "    pm.expect(jsonData.collection).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments/{{paymentId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{paymentId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Track Shipping",
+      "item": [
+        {
+          "name": "6.1 - Get Shipping Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Shipping collection returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('collection');",
+                  "    pm.expect(jsonData.collection).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shippings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "shippings"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Complete User Journey",
+      "item": [
+        {
+          "name": "7.1 - Verify Order Completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Order is present', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('orderId');",
+                  "    pm.expect(jsonData).to.have.property('orderStatus');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/{{orderId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "testuser{{$timestamp}}@example.com",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "TestPassword123!",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productPrice",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
