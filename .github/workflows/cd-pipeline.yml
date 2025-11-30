@@ -59,6 +59,18 @@ jobs:
           cd e2e
           ./run-e2e-tests.ps1 -Environment azure -BaseUrl "http://4.246.232.222:8080"
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Locust
+        run: pip install locust
+
+      - name: Run Load Tests (Locust)
+        run: |
+          locust -f tests/locust/locustfile.py --headless -u 10 -r 1 --run-time 1m --host http://4.246.232.222:8080
+
   deploy-prod:
     name: Deploy to PROD
     needs: deploy-stage
