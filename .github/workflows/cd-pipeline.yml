@@ -36,7 +36,12 @@ jobs:
           resource-group: ecommerce-stage-rg
           cluster-name: ecommerce-stage-aks
 
-      # Rollout Strategy: Update images in manifests and apply. Kubernetes handles the rolling update.
+      - name: Clean Previous Deployments
+        run: |
+          echo "Deleting existing deployments to free up resources..."
+          kubectl delete deployment --all --ignore-not-found=true
+          sleep 60
+
       - name: Update Kubernetes Manifests
         run: |
           find k8s -name "*.yaml" -exec sed -i "s|ecommercestageacr.azurecr.io/\(.*\):.*|ecommercestageacr.azurecr.io/\1:${{ env.IMAGE_TAG }}|g" {} +
@@ -45,10 +50,10 @@ jobs:
         run: |
           kubectl apply -f k8s/
       
-      - name: Wait for Rollout to Complete
+      - name: Wait for Pods to be Ready
         run: |
-          echo "Waiting for pods to be ready (timeout 10m)..."
-          kubectl wait --for=condition=ready pod --all --timeout=600s || echo "Some pods are not ready yet, proceeding to tests anyway..."
+          echo "Waiting for pods to be ready (timeout 6m)..."
+          kubectl wait --for=condition=ready pod --all --timeout=360s || echo "Some pods are not ready yet, proceeding to tests anyway..."
 
       - name: Install Newman
         run: npm install -g newman
@@ -94,7 +99,12 @@ jobs:
           resource-group: ecommerce-prod-rg
           cluster-name: ecommerce-prod-aks
 
-      # Rollout Strategy: Update images in manifests and apply. Kubernetes handles the rolling update.
+      - name: Clean Previous Deployments
+        run: |
+          echo "Deleting existing deployments to free up resources..."
+          kubectl delete deployment --all --ignore-not-found=true
+          sleep 60
+
       - name: Update Kubernetes Manifests
         run: |
           find k8s -name "*.yaml" -exec sed -i "s|ecommercestageacr.azurecr.io/\(.*\):.*|ecommercestageacr.azurecr.io/\1:${{ env.IMAGE_TAG }}|g" {} +
