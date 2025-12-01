@@ -17,7 +17,7 @@ spec:
       containers:
       - name: proxy-client
         image: proxy-client:v0.1.0
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         ports:
         - containerPort: 8900
         resources:
