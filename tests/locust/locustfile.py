@@ -273,6 +273,12 @@ class EcommerceUser(HttpUser):
         with self.client.post("/shipping-service/api/shippings", json=payload, catch_response=True, name="/shipping-service/api/shippings (create)") as response:
             if response.status_code == 200:
                 response.success()
+            elif response.status_code == 404 and "Product with id" in response.text:
+                # Product might have been deleted by another process/user
+                # We treat this as a handled case to avoid noise in the report
+                if product_id in self.product_ids:
+                    self.product_ids.remove(product_id)
+                response.success()
             else:
                 response.failure(f"Failed to create shipping: {response.status_code} - {response.text}")
 
