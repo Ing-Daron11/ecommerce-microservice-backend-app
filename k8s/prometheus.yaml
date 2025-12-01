@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'api-gateway'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['api-gateway:8080']
+
+      - job_name: 'service-discovery'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['service-discovery:8761']
+
+      - job_name: 'cloud-config'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['cloud-config:9296']
+
+      - job_name: 'proxy-client'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['proxy-client:8900']
+
+      - job_name: 'user-service'
+        metrics_path: '/user-service/actuator/prometheus'
+        static_configs:
+          - targets: ['user-service:8700']
+
+      - job_name: 'product-service'
+        metrics_path: '/product-service/actuator/prometheus'
+        static_configs:
+          - targets: ['product-service:8500']
+
+      - job_name: 'order-service'
+        metrics_path: '/order-service/actuator/prometheus'
+        static_configs:
+          - targets: ['order-service:8300']
+
+      - job_name: 'payment-service'
+        metrics_path: '/payment-service/actuator/prometheus'
+        static_configs:
+          - targets: ['payment-service:8400']
+
+      - job_name: 'shipping-service'
+        metrics_path: '/shipping-service/actuator/prometheus'
+        static_configs:
+          - targets: ['shipping-service:8600']
+
+      - job_name: 'favourite-service'
+        metrics_path: '/favourite-service/actuator/prometheus'
+        static_configs:
+          - targets: ['favourite-service:8800']
+
+      - job_name: 'zipkin'
+        metrics_path: '/prometheus'
+        static_configs:
+          - targets: ['zipkin:9411']
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus/prometheus.yml
+          subPath: prometheus.yml
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+  - name: http
+    port: 9090
+    targetPort: 9090
