@@ -215,3 +215,29 @@ kubectl logs <nombre-del-pod>
 
 **Última actualización:** Diciembre 1, 2025
 
+---
+
+## 11. Observabilidad y Monitoreo
+
+### Stack Implementado
+- **Prometheus**: Recolección de métricas (Puerto 9090)
+- **Grafana**: Visualización de métricas (Puerto 3000)
+
+### Acceso
+
+**Prometheus:**
+```bash
+http://localhost:9090
+```
+
+**Grafana:**
+```bash
+http://localhost:3000
+# Usuario: admin
+# Contraseña: admin
+```
+
+### Configuración
+Las métricas se exponen en `/actuator/prometheus` en cada microservicio.
+Prometheus está configurado para hacer scraping de todos los servicios definidos
+
