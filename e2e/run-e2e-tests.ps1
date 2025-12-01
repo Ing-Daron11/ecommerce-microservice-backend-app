@@ -54,20 +54,52 @@ Write-Host ""
 
 # --- WARM-UP LOGIC START ---
 Write-Host "Checking service availability (Warm-up)..." -ForegroundColor Yellow
-$maxRetries = 10
-$retryDelay = 5
-$healthCheckUrl = "$BaseUrl/app/actuator/health" # Assuming actuator is exposed, or use a simple endpoint
+$maxRetries = 30
+$retryDelay = 10
+$healthCheckUrl = "$BaseUrl/app/api/users"
+
+# JSON Body for Warm-up Request (Create User)
+$warmUpBody = @{
+    firstName = "WarmUp"
+    lastName = "User"
+    imageUrl = "https://example.com/image.jpg"
+    email = "warmup_$(Get-Random)@example.com"
+    phone = "1234567890"
+    addressDtos = @(
+        @{
+            fullAddress = "456 Test St"
+            postalCode = "54321"
+            city = "Test City"
+        }
+    )
+    credential = @{
+        username = "WarmUpUser_$(Get-Random)"
+        password = "WarmUpPassword123!"
+        roleBasedAuthority = "ROLE_ADMIN"
+        isEnabled = $true
+        isAccountNonExpired = $true
+        isAccountNonLocked = $true
+        isCredentialsNonExpired = $true
+    }
+} | ConvertTo-Json -Depth 5
 
 for ($i = 1; $i -le $maxRetries; $i++) {
     try {
-        $response = Invoke-WebRequest -Uri $healthCheckUrl -Method Get -UseBasicParsing -ErrorAction Stop
-        if ($response.StatusCode -eq 200) {
+        # Send POST request to trigger repo cloning/initialization
+        $response = Invoke-WebRequest -Uri $healthCheckUrl -Method Post -Body $warmUpBody -ContentType "application/json" -UseBasicParsing -ErrorAction Stop
+        
+        if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
             Write-Host "Service is UP and responding! (Attempt $i/$maxRetries)" -ForegroundColor Green
             break
         }
     }
     catch {
-        Write-Host "Service not ready yet (Attempt $i/$maxRetries). Waiting ${retryDelay}s..." -ForegroundColor DarkGray
+        if ($_.Exception.Response) {
+             $statusCode = $_.Exception.Response.StatusCode.value__
+             Write-Host "Service returned HTTP $statusCode (Attempt $i/$maxRetries). Waiting ${retryDelay}s..." -ForegroundColor DarkGray
+        } else {
+             Write-Host "Connection failed (Attempt $i/$maxRetries). Waiting ${retryDelay}s..." -ForegroundColor DarkGray
+        }
         Start-Sleep -Seconds $retryDelay
     }
     
