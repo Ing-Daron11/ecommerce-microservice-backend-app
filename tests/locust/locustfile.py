@@ -157,12 +157,47 @@ class EcommerceUser(HttpUser):
     def add_favourite_simulation(self):
         if not hasattr(self, 'user_ids') or not self.user_ids:
             return
-        if not hasattr(self, 'product_ids') or not self.product_ids:
+        
+        # Fix: Create a product first to ensure it exists, instead of relying on random IDs
+        # This avoids 404 errors when the database is fresh or products are deleted
+        
+        # 1. Create a temporary product
+        import uuid
+        category_id = 1 # Default category usually exists
+        if hasattr(self, 'category_ids') and self.category_ids:
+             category_id = random.choice(self.category_ids)
+             
+        prod_payload = {
+            "productTitle": f"Fav Product {uuid.uuid4()}",
+            "imageUrl": "https://example.com/fav.png",
+            "sku": f"SKU-FAV-{random.randint(10000, 99999)}",
+            "priceUnit": 50.0,
+            "quantity": 10,
+            "category": {
+                "categoryId": category_id
+            }
+        }
+        
+        product_id = None
+        with self.client.post("/product-service/api/products", json=prod_payload, catch_response=True, name="/product-service/api/products (create-for-fav)") as prod_resp:
+            if prod_resp.status_code == 200:
+                try:
+                    product_id = prod_resp.json().get("productId")
+                    prod_resp.success()
+                except:
+                    prod_resp.failure("Failed to parse product response")
+            else:
+                # If we can't create a product, try to use an existing one from the pool
+                if hasattr(self, 'product_ids') and self.product_ids:
+                    product_id = random.choice(self.product_ids)
+                else:
+                    return # Give up if no product available
+
+        if not product_id:
             return
 
+        # 2. Add to favourites
         user_id = random.choice(self.user_ids)
-        product_id = random.choice(self.product_ids)
-        
         now = datetime.now()
         formatted_date = now.strftime("%d-%m-%Y__%H:%M:%S") + f":{now.microsecond:06d}"
         
