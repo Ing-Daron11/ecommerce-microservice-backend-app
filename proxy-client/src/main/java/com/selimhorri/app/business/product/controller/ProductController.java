@@ -20,6 +20,7 @@ import com.selimhorri.app.business.product.model.response.ProductProductServiceC
 import com.selimhorri.app.business.product.service.ProductClientService;
 import com.selimhorri.app.business.product.strategy.ProductSortStrategy;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -34,6 +35,7 @@ public class ProductController {
 	private boolean readOnlyMode;
 	
 	@GetMapping
+	@Bulkhead(name = "productClientService", type = Bulkhead.Type.SEMAPHORE)
 	public ResponseEntity<ProductProductServiceCollectionDtoResponse> findAll(
 			@RequestParam(name = "sort", defaultValue = "default") String sortStrategyName) {
 		
