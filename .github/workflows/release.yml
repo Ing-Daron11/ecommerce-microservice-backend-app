@@ -1,0 +1,24 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Se activa cuando subes un tag como v1.0.0, v2.1.0, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true # ¡Esto genera las notas automáticamente!
+          draft: false
+          prerelease: false
