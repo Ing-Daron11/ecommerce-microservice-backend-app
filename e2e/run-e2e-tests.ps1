@@ -52,6 +52,31 @@ Write-Host "  Base URL: $BaseUrl" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
+# --- WARM-UP LOGIC START ---
+Write-Host "Checking service availability (Warm-up)..." -ForegroundColor Yellow
+$maxRetries = 10
+$retryDelay = 5
+$healthCheckUrl = "$BaseUrl/app/actuator/health" # Assuming actuator is exposed, or use a simple endpoint
+
+for ($i = 1; $i -le $maxRetries; $i++) {
+    try {
+        $response = Invoke-WebRequest -Uri $healthCheckUrl -Method Get -UseBasicParsing -ErrorAction Stop
+        if ($response.StatusCode -eq 200) {
+            Write-Host "Service is UP and responding! (Attempt $i/$maxRetries)" -ForegroundColor Green
+            break
+        }
+    }
+    catch {
+        Write-Host "Service not ready yet (Attempt $i/$maxRetries). Waiting ${retryDelay}s..." -ForegroundColor DarkGray
+        Start-Sleep -Seconds $retryDelay
+    }
+    
+    if ($i -eq $maxRetries) {
+        Write-Host "WARNING: Service did not respond after warm-up. Proceeding with tests anyway, but they might fail." -ForegroundColor Red
+    }
+}
+# --- WARM-UP LOGIC END ---
+
 $textReport = Join-Path -Path $ReportDir -ChildPath "e2e-results-$Environment-$timestamp.txt"
 
 # Clean up old reports from the same environment
