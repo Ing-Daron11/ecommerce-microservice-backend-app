@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: proxy-client
-        image: proxy-client:v0.1.0
+        image: ecommercestageacr.azurecr.io/proxy-client:v0.1.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8900
