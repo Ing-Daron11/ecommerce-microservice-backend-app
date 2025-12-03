@@ -29,7 +29,7 @@ data:
           - targets: ['cloud-config:9296']
 
       - job_name: 'proxy-client'
-        metrics_path: '/actuator/prometheus'
+        metrics_path: '/app/actuator/prometheus'
         static_configs:
           - targets: ['proxy-client:8900']
 

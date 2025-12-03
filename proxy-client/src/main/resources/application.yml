@@ -25,50 +25,62 @@ feature:
 
 resilience4j:
   circuitbreaker:
-    instances:
-      productClientService:
+    configs:
+      default:
         register-health-indicator: true
-        event-consumer-buffer-size: 10
-        automatic-transition-from-open-to-half-open-enabled: true
-        failure-rate-threshold: 50
+        sliding-window-size: 10
         minimum-number-of-calls: 5
         permitted-number-of-calls-in-half-open-state: 3
-        sliding-window-size: 10
+        automatic-transition-from-open-to-half-open-enabled: true
         wait-duration-in-open-state: 5s
-        sliding-window-type: COUNT_BASED
+        failure-rate-threshold: 50
+        event-consumer-buffer-size: 10
+    instances:
+      productClientService:
+        baseConfig: default
+      userClientService:
+        baseConfig: default
   bulkhead:
     instances:
       productClientService:
         maxConcurrentCalls: 5
         maxWaitDuration: 0ms
   timelimiter:
+    configs:
+      default:
+        timeoutDuration: 30s
     instances:
       productClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       paymentClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       credentialClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       verificationTokenClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       userClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       addressClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       shippingClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       cartClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       orderClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       categoryClientService:
-        timeoutDuration: 10s
+        baseConfig: default
       favouriteClientService:
-        timeoutDuration: 10s
+        baseConfig: default
 
 feign:
   circuitbreaker:
     enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 30000
 
 eureka:
   client:
@@ -92,6 +104,9 @@ management:
 logging:
   level:
     io.github.resilience4j: DEBUG
+    com.selimhorri.app: DEBUG
+    org.springframework.web: DEBUG
+    feign: DEBUG
 
 
 
