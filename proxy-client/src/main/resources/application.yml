@@ -41,6 +41,30 @@ resilience4j:
       productClientService:
         maxConcurrentCalls: 5
         maxWaitDuration: 0ms
+  timelimiter:
+    instances:
+      productClientService:
+        timeoutDuration: 10s
+      paymentClientService:
+        timeoutDuration: 10s
+      credentialClientService:
+        timeoutDuration: 10s
+      verificationTokenClientService:
+        timeoutDuration: 10s
+      userClientService:
+        timeoutDuration: 10s
+      addressClientService:
+        timeoutDuration: 10s
+      shippingClientService:
+        timeoutDuration: 10s
+      cartClientService:
+        timeoutDuration: 10s
+      orderClientService:
+        timeoutDuration: 10s
+      categoryClientService:
+        timeoutDuration: 10s
+      favouriteClientService:
+        timeoutDuration: 10s
 
 feign:
   circuitbreaker:

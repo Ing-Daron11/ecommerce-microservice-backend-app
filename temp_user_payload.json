@@ -1,0 +1,11 @@
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "testuser@example.com",
+  "phone": "1234567890",
+  "credential": {
+    "username": "testuser",
+    "password": "password123",
+    "roleBasedAuthority": "ROLE_USER"
+  }
+}
