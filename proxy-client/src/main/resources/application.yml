@@ -25,21 +25,17 @@ feature:
 
 resilience4j:
   circuitbreaker:
-    configs:
-      default:
-        register-health-indicator: true
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-        wait-duration-in-open-state: 5s
-        failure-rate-threshold: 50
-        event-consumer-buffer-size: 10
     instances:
       productClientService:
-        baseConfig: default
-      userClientService:
-        baseConfig: default
+        register-health-indicator: true
+        event-consumer-buffer-size: 10
+        automatic-transition-from-open-to-half-open-enabled: true
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        wait-duration-in-open-state: 5s
+        sliding-window-type: COUNT_BASED
   bulkhead:
     instances:
       productClientService:
@@ -51,36 +47,31 @@ resilience4j:
         timeoutDuration: 30s
     instances:
       productClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       paymentClientService:
-        baseConfig: default
+        baseConfig: 10s
       credentialClientService:
-        baseConfig: default
+        baseConfig: 10s
       verificationTokenClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       userClientService:
-        baseConfig: default
+        baseConfig: 10s
       addressClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       shippingClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       cartClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       orderClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       categoryClientService:
-        baseConfig: default
+        timeoutDuration: 10s
       favouriteClientService:
-        baseConfig: default
+        timeoutDuration: 10s
 
 feign:
   circuitbreaker:
     enabled: true
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 30000
 
 eureka:
   client:
@@ -104,9 +95,6 @@ management:
 logging:
   level:
     io.github.resilience4j: DEBUG
-    com.selimhorri.app: DEBUG
-    org.springframework.web: DEBUG
-    feign: DEBUG
 
 
 
