@@ -45,6 +45,8 @@ La infraestructura reside completamente en la nube de **Microsoft Azure**, orque
 
 ## 2. Arquitectura de Infraestructura en Azure
 
+![AzureArchitectureDiagram](images/FinalArchitecture.png)
+
 Para soportar la carga de trabajo y garantizar un ciclo de vida de software profesional, se ha migrado de un entorno local (Minikube) a una infraestructura robusta en la nube utilizando Azure Kubernetes Service (AKS).
 
 ### Estrategia de Despliegue y Regiones
@@ -222,17 +224,7 @@ kubectl logs <nombre-del-pod>
 ### Stack Implementado
 - **Prometheus**: Recolección de métricas (Puerto 9090)
 - **Grafana**: Visualización de métricas (Puerto 3000)
-
-### Acceso
-
-**Prometheus:**
 ```bash
-http://localhost:9090
-```
-
-**Grafana:**
-```bash
-http://localhost:3000
 # Usuario: admin
 # Contraseña: admin
 ```

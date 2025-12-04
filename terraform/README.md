@@ -4,24 +4,7 @@ This project uses Terraform to provision the infrastructure on Azure.
 
 ## Architecture Diagram
 
-```mermaid
-graph TD
-    User[User] --> LB[Azure Load Balancer]
-    subgraph Azure Cloud
-        subgraph Resource Group
-            LB --> AKS[AKS Cluster]
-            subgraph VNet
-                subgraph Subnet
-                    AKS
-                end
-            end
-            AKS --> Pods[Microservices Pods]
-        end
-        subgraph Storage Account
-            TFState[Terraform State]
-        end
-    end
-```
+![alt text](images/Architecture.png)
 
 ## Modules
 
