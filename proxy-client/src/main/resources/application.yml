@@ -25,8 +25,8 @@ feature:
 
 resilience4j:
   circuitbreaker:
-    instances:
-      productClientService:
+    configs:
+      default:
         register-health-indicator: true
         event-consumer-buffer-size: 10
         automatic-transition-from-open-to-half-open-enabled: true
@@ -36,15 +36,73 @@ resilience4j:
         sliding-window-size: 10
         wait-duration-in-open-state: 5s
         sliding-window-type: COUNT_BASED
+    instances:
+      productClientService:
+        baseConfig: default
+      userClientService:
+        baseConfig: default
+      paymentClientService:
+        baseConfig: default
+      credentialClientService:
+        baseConfig: default
+      verificationTokenClientService:
+        baseConfig: default
+      addressClientService:
+        baseConfig: default
+      shippingClientService:
+        baseConfig: default
+      cartClientService:
+        baseConfig: default
+      orderClientService:
+        baseConfig: default
+      categoryClientService:
+        baseConfig: default
+      favouriteClientService:
+        baseConfig: default
   bulkhead:
     instances:
       productClientService:
         maxConcurrentCalls: 5
         maxWaitDuration: 0ms
+      userClientService:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0ms
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 30s
+    instances:
+      productClientService:
+        baseConfig: default
+      paymentClientService:
+        baseConfig: default
+      credentialClientService:
+        baseConfig: default
+      verificationTokenClientService:
+        baseConfig: default
+      userClientService:
+        baseConfig: default
+      addressClientService:
+        baseConfig: default
+      shippingClientService:
+        baseConfig: default
+      cartClientService:
+        baseConfig: default
+      orderClientService:
+        baseConfig: default
+      categoryClientService:
+        baseConfig: default
+      favouriteClientService:
+        baseConfig: default
 
 feign:
   circuitbreaker:
     enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 30000
 
 eureka:
   client:
@@ -68,6 +126,9 @@ management:
 logging:
   level:
     io.github.resilience4j: DEBUG
+    com.selimhorri.app: DEBUG
+    org.springframework.web: DEBUG
+    feign: DEBUG
 
 
 
