@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: ecommercestageacr.azurecr.io/api-gateway:v1.0.0
-        imagePullPolicy: Always
+        image: api-gateway:v0.1.0
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
         resources:

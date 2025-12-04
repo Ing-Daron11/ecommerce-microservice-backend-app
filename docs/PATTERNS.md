@@ -22,6 +22,14 @@
 - **Implementación**: `proxy-client`.
 - **Descripción**: Un servicio que actúa como intermediario para agregar o adaptar datos de múltiples microservicios antes de enviarlos al cliente.
 
+### Circuit Breaker (Cortacircuitos)
+- **Implementación**: Resilience4j (`proxy-client`).
+- **Descripción**: Evita fallos en cascada deteniendo las llamadas a un servicio que falla repetidamente y proporcionando una respuesta de fallback.
+
+### Bulkhead (Mamparos)
+- **Implementación**: Resilience4j (`proxy-client`).
+- **Descripción**: Aísla recursos (como hilos de ejecución) para que el fallo o saturación de un servicio no agote los recursos de toda la aplicación.
+
 ## 2. Patrones de Diseño de Software (GoF y otros)
 
 ### Data Transfer Object (DTO)
@@ -43,3 +51,11 @@
 ### MVC (Model-View-Controller)
 - **Uso**: Spring Web MVC en todos los servicios.
 - **Descripción**: Separa la lógica de negocio (Controller/Service) de la representación (View/JSON) y los datos (Model).
+
+### Strategy Pattern (Estrategia)
+- **Uso**: `ProductSortStrategy` en `proxy-client`.
+- **Descripción**: Permite seleccionar dinámicamente el algoritmo de ordenamiento de productos en tiempo de ejecución.
+
+### Feature Toggle (Interruptor de Funcionalidad)
+- **Uso**: `ProductController` en `proxy-client`.
+- **Descripción**: Permite activar o desactivar funcionalidades (como el modo "Solo Lectura") mediante configuración sin modificar el código.

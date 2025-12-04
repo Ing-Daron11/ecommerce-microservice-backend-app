@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: payment-service
-        image: ecommercestageacr.azurecr.io/payment-service:v1.0.0
-        imagePullPolicy: Always
+        image: payment-service:v0.1.0
+        imagePullPolicy: Never
         ports:
         - containerPort: 8400
         resources:

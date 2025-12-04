@@ -55,7 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.GET, "/api/categories/*").permitAll()
 			.antMatchers(HttpMethod.GET, "/app/api/categories").permitAll()  // ✅ AGREGADO
 			.antMatchers(HttpMethod.GET, "/app/api/categories/*").permitAll()  // ✅ AGREGADO
-			.antMatchers("/actuator/health/**", "/actuator/info/**").permitAll()
+			.antMatchers("/actuator/health/**", "/actuator/info/**", "/actuator/prometheus/**").permitAll()
+			.antMatchers("/app/actuator/health/**", "/app/actuator/info/**", "/app/actuator/prometheus/**").permitAll()
 				// Admin only
 				.antMatchers("/actuator/**").hasRole(RoleBasedAuthority.ROLE_ADMIN.getRole())
 				// Protected endpoints - authentication required
