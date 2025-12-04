@@ -224,6 +224,7 @@ kubectl logs <nombre-del-pod>
 ### Stack Implementado
 - **Prometheus**: Recolección de métricas (Puerto 9090)
 - **Grafana**: Visualización de métricas (Puerto 3000)
+- **Stack ELK** (puerto 5601) <-Kibana
 ```bash
 # Usuario: admin
 # Contraseña: admin
@@ -232,4 +233,10 @@ kubectl logs <nombre-del-pod>
 ### Configuración
 Las métricas se exponen en `/actuator/prometheus` en cada microservicio.
 Prometheus está configurado para hacer scraping de todos los servicios definidos
+
+![alt text](images/ELK.png)
+
+![alt text](images/Prometheus.png)
+
+![alt text](images/Grafana.png)
 
