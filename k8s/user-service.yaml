@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: ecommercestageacr.azurecr.io/user-service:v1.0.0
-        imagePullPolicy: Always
+        image: user-service:v0.1.0
+        imagePullPolicy: Never
         ports:
         - containerPort: 8700
         resources:
