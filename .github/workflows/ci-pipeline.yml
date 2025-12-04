@@ -44,7 +44,7 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=ecommerce-microservice-backend \
+          -Dsonar.projectKey=ecommerce-microservice-backend2 \
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
 
       - name: Build & Unit Tests
