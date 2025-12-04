@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: favourite-service
-        image: favourite-service:v0.1.0
-        imagePullPolicy: Never
+        image: ecommercestageacr.azurecr.io/favourite-service:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8800
         resources:

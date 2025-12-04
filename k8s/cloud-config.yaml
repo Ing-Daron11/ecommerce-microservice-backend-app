@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: cloud-config
-        image: cloud-config:v0.1.0
-        imagePullPolicy: Never
+        image: ecommercestageacr.azurecr.io/cloud-config:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 9296
         resources:

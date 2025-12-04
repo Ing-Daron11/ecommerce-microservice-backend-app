@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: service-discovery
-        image: service-discovery:v0.1.0
-        imagePullPolicy: Never  # Importante: usa la imagen local de Minikube
+        image: ecommercestageacr.azurecr.io/service-discovery:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8761
         resources:

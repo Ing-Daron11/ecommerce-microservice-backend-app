@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: shipping-service
-        image: shipping-service:v0.1.0
-        imagePullPolicy: Never
+        image: ecommercestageacr.azurecr.io/shipping-service:v1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8600
         resources:
